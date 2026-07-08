@@ -1,7 +1,0 @@
-services:
-  nginx:
-    image: nginx
-    container_name: site
-    build: .
-    ports:
-      - "8080:80"
