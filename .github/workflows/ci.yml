@@ -67,12 +67,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.AZURE_CLIENT_SECRET }}
 
-      - name: Build e push do backend
-        uses: docker/build-push-action@v6
-        with:
-          context: nodejs-app/backend
-          push: true
-          tags: ghcr.io/${{ github.repository }}/node-backend:latest
+     # - name: Build e push do backend
+     #   uses: docker/build-push-action@v6
+     #   with:
+     #     context: nodejs-app/backend
+     #     push: true
+     #     tags: ghcr.io/${{ github.repository }}/node-backend:latest
 
       - name: Build e push do frontend
         uses: docker/build-push-action@v6
