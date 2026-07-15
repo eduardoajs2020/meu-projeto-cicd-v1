@@ -1,4 +1,4 @@
-name: Node.js CI/CD
+name: ci
 
 # Dispara em pushes e PRs, mas só quando algo do app Node muda.
 on:
