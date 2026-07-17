@@ -2,9 +2,9 @@ name: devsecops-ci
 
 on:
   push:
-    branches: [main]
+    branches: [aula_4]
   pull_request:
-    branches: [main]
+    branches: [aula_4]
 
 permissions:
   contents: read
