@@ -1,0 +1,1 @@
+{ "name": "meu-projeto-cicd-v1", "version": "1.0.0", "description": "Projeto CI/CD", "main": "app.js", "scripts": { "lint": "echo \"Lint OK\"", "test": "echo \"Tests OK\"", "build": "mkdir -p dist && cp index.html dist/ && cp style.css dist/ && cp app.js dist/" } }
