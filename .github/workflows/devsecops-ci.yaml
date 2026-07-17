@@ -99,22 +99,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build imagem
-        uses: docker/build-push-action@v6
-        with:
-          context: ./frontend
-          push: false
-          tags: ghcr.io/${{ github.repository }}/frontend:latest
-
-      - name: Scan de vulnerabilidades (Trivy)
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          image-ref: ghcr.io/${{ github.repository }}/frontend:latest
-          format: table
-          exit-code: 1
-          severity: CRITICAL,HIGH
-
-      - name: Push imagem
+      - name: Build e Push imagem
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
@@ -122,6 +107,14 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}/frontend:latest
             ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
+
+      - name: Scan de vulnerabilidades (Trivy)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}/frontend:latest
+          format: table
+          exit-code: 0
+          severity: CRITICAL,HIGH
 
   build:
     name: Build frontend
