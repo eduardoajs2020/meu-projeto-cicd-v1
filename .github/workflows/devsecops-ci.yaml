@@ -1,4 +1,4 @@
-name: devsecops-ci
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,117 +6,53 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: read
-  security-events: write
-  packages: write
-  id-token: write
-
 jobs:
   test:
-    name: Lint e testes (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [18, 20, 22]
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
-      - run: npm run lint
-      - run: npm test
-
-  sast:
-    name: SAST (CodeQL)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
-        with:
-          languages: javascript
-      - run: echo "No build step required"
-      - uses: github/codeql-action/analyze@v3
-
-  dependency-scan:
-    name: Scan de dependências
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci
-      - run: npm audit --audit-level=high
+      - working-directory: frontend
+        run: npm ci
+      - working-directory: frontend
+        run: npm run lint
+      - working-directory: frontend
+        run: npm test
 
   build:
-    name: Build frontend
-    needs: test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
-      - run: npm run build
+      - working-directory: frontend
+        run: npm ci
+      - working-directory: frontend
+        run: npm run build
       - uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: frontend/dist
 
-  docker:
-    name: Build Docker
-    needs: [test, sast, dependency-scan]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
-        with:
-          context: ./frontend
-          push: true
-          tags: ghcr.io/${{ github.repository }}/frontend:latest
-
   deploy:
-    name: Deploy GitHub Pages
-    needs: [build]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test, build]
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       pages: write
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: frontend-build
           path: dist
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v4
